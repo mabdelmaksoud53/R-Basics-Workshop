@@ -1,0 +1,176 @@
+---
+title: "Data visualization Part- (ggplot2)"
+Author: "Mostafa S. Abd El-Maksoud"
+output: html_notebook
+---
+
+- Make sure that you have both libraries installed. If not, you can install them first using:
+
+```{r}
+# Installing the libraries if not installed already
+install.packages("ggplot2")
+install.packages("ggsci")
+```
+
+- To start using the libraries you mentioned in your R code, you can import them with the library() function. Here's how you can load the libraries:
+
+```{r}
+# Importing necessary libraries
+library(ggplot2)  # For data visualization using ggplot
+library(ggsci)    # For additional color scales in ggplot2
+```
+
+- Access the datasets
+```{r}
+diamonds <- diamonds
+head(diamonds)  # View the first few rows of the diamonds dataset
+
+# Access the mpg dataset
+mpg <- mpg
+head(mpg)
+```
+
+# 1. Bar Chart
+- Used to represent categorical data along the x-axis.
+
+- Basic Bar Plot:
+```{r}
+# Basic bar plot
+ggplot(diamonds, aes(x = cut)) +
+  geom_bar() +
+  theme_bw()  # Adds a clean theme
+```
+
+- Bar Plot with Fill by Categorical Variable:
+```{r}
+# Bar plot filled by another categorical variable
+ggplot(diamonds, aes(x = cut, fill = color)) +
+  geom_bar() +
+  theme_bw()
+```
+
+- Bar Plot with Custom Colors from ggsci:
+```{r}
+# Using ggsci library for color palette
+ggplot(diamonds, aes(x = cut, fill = color)) +
+  geom_bar() +
+  theme_bw() + scale_fill_manual(values = pal_igv()(7))
+```
+
+-Bar Plot with Facets (Split by a Variable):
+```{r}
+# Split the bar plot into multiple subplots using facet_wrap()
+ggplot(data = diamonds, aes(x = cut, fill = clarity)) +
+  geom_bar() +
+  theme_bw() +
+  facet_wrap(~color)
+```
+
+# 2. Histogram
+- Used to represent the distribution of numerical data on the x-axis, with optional fill by a categorical variable.
+
+- Basic Histogram:
+```{r}
+# Basic histogram
+ggplot(data = diamonds, aes(x = price)) +
+  geom_histogram(bins = 30, fill = "grey", color = "black", alpha = 0.5) +
+  theme_bw() +
+  labs(x = "Price", y = "Count", title = "Graph")
+```
+
+- Histogram with Fill by Categorical Variable:
+```{r}
+# Histogram with fill based on 'cut' category
+ggplot(data = diamonds, aes(x = price, fill = cut)) +
+  geom_histogram(bins = 30, alpha = 0.5) +
+  theme_bw() +
+  labs(x = "Price", y = "Count", title = "Graph")
+```
+
+# 3. Box Plot
+- Used to represent categorical data on the x-axis and numerical data on the y-axis.
+
+- Basic Box Plot:
+```{r}
+# Basic box plot with drv as categorical and hwy as numeric
+ggplot(mpg, aes(drv, hwy)) + theme_bw() + geom_boxplot()
+```
+
+- Box Plot with Grouping:
+```{r}
+# Box plot with grouping by 'drv'
+ggplot(data = mpg, aes(x = drv, y = hwy, group = drv)) +
+  theme_bw() +
+  geom_boxplot()
+```
+
+- Box Plot with Fill by Manufacturer:
+```{r}
+# Box plot with 'manufacturer' as the fill
+ggplot(data = mpg, aes(x = drv, y = hwy, fill = manufacturer)) +
+  theme_bw() +
+  geom_boxplot()
+```
+
+- Box Plot with Jitter:
+```{r}
+# Box plot with jittered points to show distribution
+ggplot(data = mpg, aes(drv, hwy)) +
+  theme_bw() +
+  geom_boxplot() + geom_jitter(width = 0.2, aes(color = trans))
+```
+
+# 4. Scatter Plot
+- Used to represent two numerical variables for comparison.
+
+- Basic Scatter Plot:
+```{r}
+# Basic scatter plot with carat vs price
+ggplot(diamonds, aes(carat, price)) +
+  geom_point() +
+  theme_bw()
+```
+
+- Scatter Plot with Color Based on Categorical Variable:
+```{r}
+# Scatter plot colored by 'cut'
+ggplot(diamonds, aes(carat, price, color = cut)) +
+  geom_point() +
+  theme_bw()
+```
+
+- Scatter Plot with Another Coloring Method:
+```{r}
+# Scatter plot with coloring by 'clarity'
+ggplot(diamonds, aes(carat, price)) +
+  geom_point(aes(color = clarity)) +
+  theme_bw()
+```
+
+- Scatter Plot with Facets:
+```{r}
+# Scatter plot divided by 'cut'
+ggplot(diamonds, aes(carat, price, color = cut)) +
+  geom_point() +
+  theme_bw() +
+  facet_grid(~cut)
+```
+
+- Scatter Plot with Custom Shape:
+```{r}
+# Scatter plot with custom shape, size, and fill
+ggplot(diamonds, aes(carat, price, color = cut)) +
+  geom_point(shape = 21, size = 3, stroke = 2, fill = "white") +
+  theme_bw() +
+  facet_grid(~cut)
+```
+
+- Scatter Plot with Linear Trend Line:
+```{r}
+# Scatter plot with linear regression line
+ggplot(diamonds, aes(carat, price, color = cut)) +
+  geom_point(shape = 21, size = 3, stroke = 2, fill = "white") +
+  theme_bw() +
+  stat_smooth(se = F) +  # Add linear trend line
+  facet_grid(~cut)
+```
