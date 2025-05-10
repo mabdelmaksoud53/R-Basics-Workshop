@@ -1,0 +1,137 @@
+---
+title: "Manipulating Data with `dplyr`"
+author: Mostafa S. Abd El-Maksoud
+output: html_notebook
+---
+
+- In this notebook, we will learn how to perform data manipulation — and create data processing pipelines — using a powerful package called `dplyr`.
+
+`dplyr` is part of [`tidyverse`](https://www.tidyverse.org/), a collection of R packages for data science. `tidyverse` also includes `ggplot2`, one of the most widely used data visualization packages.
+
+## Preliminaries
+
+- `tidyverse` is not built into R, so we first have to install it:
+
+```{r}
+install.packages("tidyverse")
+```
+
+- Afterwards, we have to tell R that we want to use `tidyverse`:
+
+```{r}
+library("tidyverse")
+```
+
+## Goodbye Data Frames! Hello Tibbles
+
+- `tidyverse` introduced a faster and better version of R's built-in data frame; we call this a **tibble**. 
+
+- Since this notebook aims to familiarize ourselves with `dplyr`, we will make a shift from data frames to tibbles. 
+
+- We start by loading our dataset 
+- note that tibbles are loaded using `read_delim` while data frames are loaded using `read.delim`:
+
+```{r}
+data <- read_delim("data.tsv")
+```
+We check the columns of our dataset:
+
+```{r}
+str(data)
+```
+
+We view our dataset (this opens a new tab in RStudio): 
+
+```{r}
+View(data)
+```
+
+## Selecting Columns & Filtering Rows
+
+- To select columns, we use `select()`. The first argument is the dataset, and the succeeding arguments are the columns to be included.
+
+```{r}
+data_subset <- select(data, Accession, Family, Order, Class)
+data_subset
+```
+
+- To filter rows, we use `filter()`.
+
+```{r}
+data_subset <- filter(data_subset, Family != "Unclassified" & Order != "Unclassified" & Class != "Unclassified")
+data_subset
+```
+
+## Pipe: The "Then" Operator
+
+- The processing that we just performed — selecting columns then filtering rows — is actually a simple pipeline already! But notice how our code can easily become cluttered if we are to add more intermediate steps.
+
+- Fortunately, `dplyr` provides a convenient operator called a pipe: `%>%` (a shortcut to typing this operator is by pressing Ctrl+Shift+M or Cmd+Shift+M for Mac). We can think of `%>%` as equivalent to the English "then."
+
+- To illustrate its usage, we rewrite our pipeline like so: 
+
+```{r}
+data_subset_using_pipe <- data  %>% 
+  select(Accession, Family, Order, Class) %>% 
+  filter(Family != "Unclassified" & Order != "Unclassified" & Class != "Unclassified")
+data_subset_using_pipe
+```
+
+- Observe how the syntax is mostly the same, with the exception of the first argument of `select()` and `filter()`. Since we already specified `data` at the start of the pipeline, we do not need to pass it anymore as an argument to the data manipulation functions.
+
+## Adding Columns (Mutate)
+
+To add columns, we use `mutate()`.
+
+- We have a column called `Genome Length (bp)` but we want a new column where the genome length is expressed in terms of kbp.
+
+```{r}
+# We enclose column names with spaces in backticks ``
+
+data_with_new_column <- data %>%
+    mutate(`Genome Length (kbp)` = `Genome Length (bp)` / 1000)
+data_with_new_column
+```
+
+## Getting a Column (Pull)
+
+- Suppose we want to get all the accessions of the phages in our dataset.
+- As we learned earlier, we can use `select()`.
+
+```{r}
+data %>% select(Accession)
+```
+
+- This works, but this is a one-column tibble. What if we want a vector? We can use `pull()` instead.
+
+```{r}
+data %>% pull(Accession)
+```
+## Split-Apply-Combine Data Analysis
+
+- Let us now try to create more complex pipelines for exploratory data analysis — and, along the way, introduce some functions for aggregating entries and statistics!
+
+- Suppose we want to get the number of phages infecting each host genus. This is a good use case for `group_by()` and `n()` (for counting the number of entries in a group):
+
+```{r}
+data %>% 
+  select(Accession, Host) %>% 
+  filter(Host != "Unspecified") %>%
+  group_by(Host) %>% 
+  summarize(count = n()) %>%
+  arrange(desc(count))           # desc() means arrange in descending order
+```
+
+- Suppose we want to get the mean and the median guanine-cytosine (GC) content of the phages when grouped by host genus:
+
+```{r}
+# We enclose column names with spaces in backticks ``
+
+data %>% 
+  select(Accession, Host, `molGC (%)`) %>% 
+  filter(Host != "Unspecified") %>%
+  group_by(Host) %>% 
+  summarize(mean_gc = mean(`molGC (%)`),
+            median_gc = median(`molGC (%)`)) %>%
+  arrange(desc(mean_gc))           # desc() means arrange in descending order
+```

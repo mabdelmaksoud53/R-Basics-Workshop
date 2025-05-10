@@ -1,0 +1,69 @@
+---
+title: "Inferential Statistics"
+author: Mostafa S. Abd El-Maksoud
+output: html_notebook
+---
+
+- In this notebook, we will learn how to perform statistical inference in R.
+
+## Preliminaries
+
+- We start by importing `tidyverse`.
+
+```{r}
+library("tidyverse")
+```
+
+- We load our dataset.
+
+```{r}
+data <- read_delim("data.tsv")
+```
+
+## One-sample t-test
+
+- We take a look at the unique hosts first.
+
+```{r}
+unique(data %>% pull(Host))
+```
+
+- We get the guanine-cytosine (GC) content of the phages that target Escherichia.
+
+```{r}
+gc_escherichia <- data %>% 
+  filter(Host == "Escherichia") %>% 
+  pull(`molGC (%)`)
+gc_escherichia
+```
+
+- We get the GC content of all the phages in our dataset.
+
+```{r}
+gc_all <- data %>% 
+  pull(`molGC (%)`)
+gc_all
+```
+
+- We compare the mean of the GC content of the phages that target Escherichia versus the population mean (i.e., the mean of the GC content of all the phages in our dataset) using `t.test()`:
+
+```{r}
+t.test(gc_escherichia, mu=mean(gc_all))
+```
+
+## Two-sample t-test
+
+- We get the GC content of the phages that target Staphylococcus.
+
+```{r}
+gc_staphylococcus <- data %>% 
+  filter(Host == "Staphylococcus") %>% 
+  pull(`molGC (%)`)
+gc_staphylococcus
+```
+
+- We compare the means of the GC content of the phages that target Escherichia versus those that target Staphylococcus using `t.test()`:
+
+```{r}
+t.test(gc_escherichia, gc_staphylococcus)
+```

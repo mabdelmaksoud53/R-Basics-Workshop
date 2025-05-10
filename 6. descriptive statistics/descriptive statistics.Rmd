@@ -1,0 +1,406 @@
+---
+title: "Introduction to R - session 4"
+Author: "Mostafa S. Abd El-Maksoud"
+output: html_notebook
+
+---
+
+# Read Data
+
+```{r}
+# Read the data from a text file with headers
+data = read.table("data.txt", header = T)
+```
+
+
+# Data inspection
+
+```{r}
+# Open a data viewer window to inspect the dataset
+View(data)
+
+# Display the structure of the dataset:
+str(data)
+```
+
+---------------------------------------------------------------
+
+# Data Preprocessing: Cleaning and Formatting the Surgery Dataset
+
+```{r}
+# Convert 'sex' from numeric codes to factor with labels
+data$sex <- factor(data$sex, labels = c("female", "male"))
+
+# Convert 'SES' (socioeconomic status) from numeric to labeled factor
+data$SES <- factor(data$SES, labels = c("low", "middle", "high"))
+
+# Convert 'complic' (complications) to yes/no factor
+data$complic <- factor(data$complic, labels = c("no", "yes"))
+
+# Convert 'comorb' (comorbidities) to yes/no factor
+data$comorb <- factor(data$comorb, labels = c("no", "yes"))
+
+# Convert 'depressi' (depression) to yes/no factor
+data$depressi <- factor(data$depressi, labels = c("no", "yes"))
+
+# Convert 'diabetes' to yes/no factor
+data$diabetes <- factor(data$diabetes, labels = c("no", "yes"))
+
+# Convert 'surgery' type from numeric code to descriptive factor
+data$surgery <- factor(data$surgery, labels = c("gastric band", "gastric bypass"))
+
+# Convert BMIpost, BMIpre, weight, and length to numeric
+# Note : You should replace commas with dots before conversion
+data$BMIpost <- as.numeric(gsub(",", ".", data$BMIpost))
+data$BMIpre  <- as.numeric(gsub(",", ".", data$BMIpre))
+data$weight  <- as.numeric(gsub(",", ".", data$weight))
+data$length  <- as.numeric(gsub(",", ".", data$length))
+
+# Check the updated structure of the data
+str(data)
+```
+
+---------------------------------------------------------------
+
+# Descriptive statistics
+
+```{r}
+# Show summary statistics for all variables in the dataset
+summary(data)
+
+# Calculate the mean (average) of 'weight', ignoring missing values
+mean(data$weight, na.rm = TRUE)
+
+# Calculate the median (middle value) of 'weight', ignoring missing values
+median(data$weight, na.rm = TRUE)
+
+# Get the minimum value of 'weight', ignoring missing values
+min(data$weight, na.rm = TRUE)
+
+# Get the maximum value of 'weight', ignoring missing values
+max(data$weight, na.rm = TRUE)
+
+# Get the 1st (25%) and 3rd (75%) quartiles of 'weight', ignoring missing values
+quantile(data$weight, na.rm = TRUE, c(0.25, 0.75))
+```
+
+
+# Why do you need to add the argument na.rm=TRUE to these commands? What happens if you don’t?
+
+- The argument `na.rm = TRUE` is used in functions like `mean()`, `median()`, `sum()`, to tell R to ignore any `NA` (missing) values during the calculation.
+
+```{r}
+# Example 1
+median(c(10, 20, NA), na.rm = TRUE)
+```
+
+- in case of `na.rm = FALSE` R will give NA because it can't compute the function with a missing value unless you explicitly tell it to ignore NAs.
+
+```{r}
+# Example 2
+median(c(10, 20, NA), na.rm = FALSE)
+```
+
+
+---------------------------------------------------------------
+
+# For a categorical variable a frequency table is more appropriate
+
+```{r}
+# Frequency table for the 'sex' variable, Shows the count of males and females
+table(data$sex)
+```
+
+- Calculate the mean age for females and males
+
+```{r}
+# Calculate the mean age for each sex group (female and male)
+tapply(data$age, list(sex = data$sex), mean, na.rm = TRUE)
+```
+
+- Calculate correlation coefficient between weights and lengths
+
+```{r}
+# Load the 'corrplot' package for visualizing correlation matrices
+library(corrplot)
+
+# use = "complete.obs" means it ignores rows with missing values
+cor(data$weight, data$length, use = "complete.obs")
+```
+
+
+---------------------------------------------------------------
+
+# Several types of correlation coefficients exist. Go to the help of the cor() function and find which correlation coefficient is calculated by defaul
+
+```{r}
+?cor # or
+help(cor)
+# Answer -> (pearson)
+```
+
+
+# Add the appropriate argument to the cor() function in the previous command so that the Spearman correlation is calculated instead.
+
+```{r}
+cor(data$weight, data$length, use = "complete.obs", method = "spearman")
+```
+
+# Some more summary statistics
+
+1. What is the maximum value of weight in the entire dataset?
+
+```{r}
+# Find the maximum value in the 'weight' column, ignoring missing values (NA)
+max(data$weight, na.rm = TRUE)
+```
+
+2. How many missing values are there for age?
+
+```{r}
+# Count the number of missing values (NA) in the 'age' column
+sum(is.na(data$age))
+```
+
+3. What is the mean value for BMIpre for the two surgical techniques (variable surgery)?
+
+```{r}
+# Calculate the mean of 'BMIpre' grouped by 'surgery' types
+aggregate(BMIpre ~ surgery, data, mean, na.rm = TRUE)
+```
+
+4. What is the Pearson correlation between the BMI before the operation (BMIpre) and the BMI after the operation (BMIpost)?
+
+```{r}
+cor(data$BMIpre, data$BMIpost, use = "complete.obs", method = "pearson")
+```
+
+
+# 3. Graphics
+
+1. Generate a bar chart of a categorical variable for the gender.
+
+```{r}
+barplot(table(data$sex), xlab = "Gender", ylab = "Frequency", main = "Gender Barplot")
+```
+
+2. Generate a bar chart graph with mean age in males and females.
+
+```{r}
+mean.age <- tapply(data$age, data$sex, mean, na.rm = TRUE)
+barplot(mean.age, col = "skyblue", xlab = "Gender", ylab = "Mean Age", main = "Mean Age by Sex")
+```
+
+3. Make a histogram of a continuous variable “age”.
+
+```{r}
+hist(data$age, xlab = "Age", ylab = "Frequency", main = "Age Histogram")
+```
+
+4. Make a scatterplot of 2 continuous variables lengths and weights (using formula notation Y~X) with different colors for each SES-value
+
+```{r}
+plot(weight ~ length, data = data, col = data$SES, pch = 19, 
+     main = "Weight vs Length by SES", xlab = "Length", ylab = "Weight")
+legend("topright", legend = levels(colors), col = 1:length(levels(colors)), pch = 19)
+```
+
+5. Add the three regression lines for each of the 3 SES groups
+
+```{r}
+plot(weight ~ length, data = data, col = data$SES, pch = 19, 
+     main = "Weight vs Length by SES", xlab = "Length", ylab = "Weight")
+
+unique_ses <- unique(data$SES)
+ses_colors <- rainbow(length(unique_ses))
+
+# Add regression lines for each SES group
+for(i in 1:length(unique_ses)) {
+  ses_group <- unique_ses[i]
+  subset_data <- data[data$SES == ses_group, ]
+  abline(lm(weight ~ length, data = subset_data), col = ses_colors[i], lwd = 2)
+}
+
+# Add a legend to indicate the SES groups with corresponding colors
+legend("topright", legend = levels(as.factor(data$SES)), col = ses_colors, 
+       pch = 19, lwd = 2)
+
+```
+
+6. Make a boxplot of age and a separate boxplots per group we use the formula-notation (Y~X).
+
+```{r}
+# Set up the plotting area to display 2x2 grid of plots
+par(mfrow = c(2,2))
+
+# Create a boxplot of 'age', showing the distribution of age values
+boxplot(data$age, 
+        main = "Box plot of age",    # Title of the plot
+        ylab = "Age")                # Label for the y-axis
+
+# Create a boxplot of 'age' grouped by 'SES' (Socioeconomic Status)
+boxplot(data$age ~ data$SES, 
+        xlab = "SES group",          # Label for the x-axis (SES group)
+        ylab = "Age",                # Label for the y-axis
+        main = "Boxplot of Age by SES Group") # Title of the plot
+
+# Create a boxplot of 'age' grouped by 'surgery' type (gastric band vs. gastric bypass)
+boxplot(data$age ~ data$surgery, 
+        xlab = "Surgery group",      # Label for the x-axis (Surgery group)
+        ylab = "Age",                # Label for the y-axis
+        main = "Boxplot of Age by Surgery Group")  # Title of the plot
+
+# Create a boxplot of 'age' grouped by 'sex' (female vs. male)
+boxplot(data$age ~ data$sex, 
+        xlab = "Gender",             # Label for the x-axis (Gender)
+        ylab = "Age",                # Label for the y-axis
+        main = "Boxplot of Age by Gender")  # Title of the plot
+```
+
+7. Make a histogram of BMIpre.
+
+```{r}
+hist(data$BMIpre, xlab = "BMIpre", ylab = "Frequency", main = "Histogram of BMIpre")
+```
+
+8. Make a bar graph of the socio-economic status (SES).
+
+```{r}
+barplot(table(data$SES), xlab = "SES", ylab = "Frequency", main = "Barplot of socio-economic status", col = "skyblue")
+```
+
+9. Make a boxplot of BMIpre for the 2 surgical intervention types defined by surgery.
+
+```{r}
+boxplot(data$BMIpre ~ data$surgery, 
+        xlab = "Surgical Intervention Type",  # Label for the x-axis
+        ylab = "BMI Before Surgery",          # Label for the y-axis
+        main = "Boxplot of BMI Before Surgery by Intervention Type",  # Plot title
+        col = c("skyblue", "lightpink")       # Colors for each surgery type (skyblue for gastric band, lightpink for gastric bypass)
+        # Uncomment the following line to set the y-axis limits and remove outliers
+        # , ylim = c(1, 60)                    # Adjust the y-axis to exclude extreme outliers
+)
+```
+
+10. Make a boxplot of BMIpost for the 2 surgical intervention types defined by surgery.
+
+```{r}
+boxplot(data$BMIpost ~ data$surgery, 
+        xlab = "Surgical Intervention Type",  # Label for the x-axis
+        ylab = "BMI Post Surgery",            # Label for the y-axis
+        main = "Boxplot of BMI Post Surgery by Intervention Type",  # Plot title
+        col = c("blue", "pink")               # Colors for each surgery type (blue for gastric band, pink for gastric bypass)
+        # Uncomment the following line to set the y-axis limits and remove outliers
+        # , ylim = c(1, 60)                    # Adjust the y-axis to exclude extreme outliers
+)
+```
+
+11. Make a scatterplot of BMIpre (Y-axis) versus age.
+
+```{r}
+plot(x = data$age, y = data$BMIpre, xlab = "Age",
+     ylab = "BMI Before Surgery", main = "Scatterplot of BMIpre vs Age",
+     pch = 19, col = "darkgreen")
+```
+
+12. Make a scatterplot of BMIpre (Y-axis) versus age, using different markers for males and females.
+
+```{r}
+# Define point characters (pch) for each level of 'sex' (1 for female, 2 for male)
+pch.values <- c(1, 2)
+names(pch.values) <- levels(data$sex)
+
+# Create a scatter plot of 'BMIpre' vs. 'age', with different colors and point shapes by 'sex'
+# 'col' assigns a color based on 'sex' (converted to numeric), 'pch' assigns point shapes
+plot(data$BMIpre ~ data$age, 
+     col = as.numeric(data$sex),         # Color points based on 'sex' (1 for female, 2 for male)
+     pch = pch.values[data$sex],         # Point shape based on 'sex' (1 for female, 2 for male)
+     xlab = "Age",                       # X-axis label
+     ylab = "BMI Before Surgery",        # Y-axis label
+     main = "BMIpre vs Age by Sex")      # Title of the plot
+
+# Add a legend to the top-right corner
+legend("topright", 
+       legend = levels(data$sex),        # Labels for 'sex' (female, male)
+       col = 1:length(levels(data$sex)), # Color for each level of 'sex'
+       pch = 1:length(levels(data$sex))) # Point shape for each level of 'sex'
+```
+
+- Add a line to the plot for each group
+
+```{r}
+# Plot
+plot(data$BMIpre ~ data$age, col = as.numeric(data$sex), xlab = "Age", 
+     ylab = "BMI Before Surgery", main = "BMIpre vs Age by Sex", 
+     pch = as.numeric(data$sex))
+
+# Add regression lines
+for (gender in levels(data$sex)) {
+  sub_data <- subset(data, sex == gender)
+  model <- lm(BMIpre ~ age, data = sub_data)
+  abline(model, col = which(levels(data$sex) == gender), lwd = 2)
+}
+
+# Define point shapes
+pch.values <- c(1, 2)
+names(pch_values) <- levels(data$sex)
+
+# Add legend
+legend("topright",
+       legend = levels(data$sex),
+       pch = pch.values,
+       col = 1:length(levels(data$sex)),
+       title = "Sex",
+       pt.cex = 1.2)
+```
+
+
+# Outlier detection
+
+- You should work on the dataset with this outlier corrected to 29.41.
+
+```{r}
+# Define the outlier threshold
+outlires_threshold <- 40
+
+# Replace values greater than the threshold in 'BMIpre' with 29.41
+data$BMIpre[data$BMIpre > outlires_threshold] <- 29.41
+
+# Replace values greater than the threshold in 'BMIpost' with 29.41
+data$BMIpost[data$BMIpost > outlires_threshold] <- 29.41
+
+# Save the modified dataset to a new file in tab-separated format
+# row.names = FALSE excludes row names, col.names = TRUE includes column names in the output file
+write.table(data, "E:/courses/Introduction to R/Session 4/modified_surgery.txt", sep = "\t", row.names = FALSE, col.names = TRUE)
+```
+
+# Testing for normality
+
+- Check the normality using, histograms, QQ plots and Shapiro’s test, for BMIpre vs BMIpost
+- Histogram for BMIpre and BMIpost
+
+```{r}
+par(mfrow = c(1,2))
+hist(data$BMIpre, main = "Histogram of BMIpre", xlab = "BMIpre", col = "lightblue")
+hist(data$BMIpost, main = "Histogram of BMIpost", xlab = "BMIpost", col = "lightgreen")
+```
+
+- QQ plots for BMIpre and BMIpost
+
+```{r}
+par(mfrow = c(1,2))
+qqnorm(data$BMIpre, main = "QQ Plot of BMIpre")
+qqline(data$BMIpre, col = "red")
+
+qqnorm(data$BMIpost, main = "QQ Plot of BMIpost")
+qqline(data$BMIpost, col = "blue")
+```
+
+- Shapiro test
+
+```{r}
+shapiro_pre <- shapiro.test(data$BMIpre)
+shapiro_post <- shapiro.test(data$BMIpost)
+print(shapiro_pre)
+print(shapiro_post)
+```
