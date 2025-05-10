@@ -38,6 +38,9 @@ R-Basics-Workshop/
 ├── Plots-baseR/
 ├── Plots-ggplot/
 ├── Descriptive statistics/
+├── Inferential Statistics/
+|── images/
+|── R_Basics_Workshop_Summary
 ├── LICENSE
 └── README.md
 ```
