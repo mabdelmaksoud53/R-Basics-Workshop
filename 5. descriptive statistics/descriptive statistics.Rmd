@@ -9,7 +9,7 @@ output: html_notebook
 
 ```{r}
 # Read the data from a text file with headers
-data = read.table("E:/courses/Introduction to R/Session 4/surgery.txt", header = T)
+data = read.table("data.txt", header = T)
 ```
 
 

@@ -1,0 +1,231 @@
+---
+title: "Groups of Data - Vectors, Matrices, Lists & Dataframes"
+author: Mostafa S. Abd El-Maksoud
+output: html_notebook
+---
+
+In this notebook, we will learn how to handle different types of data structure.
+
+R provides several ways for grouping objects: - **Vector**: Collection of objects with the same data type. - **Matrix**: Table consisting of objects with the same data type. - **List**: Collection of objects with possibly different data types. - **Dataframes**: A table or 2D structure where each column can be of different type (like a spreadsheet).
+
+## Vector
+
+-   A vector is a collection of objects with the same data type.
+-   To create a vector, use the `c()` function:
+
+```{r}
+amino_acids <- c("methionine", "leucine", "alanine", "valine", "glutamine", "threonine")
+```
+
+-   Accessing items in a vector can be done like so:
+
+```{r}
+amino_acids[1] # Access the first element
+amino_acids[2] # Access the second element
+```
+
+-   We can also combine two vectors into a single vector using the `c()` function:
+
+```{r}
+add_amino_acids <- c("glycine", "cysteine", "serine")
+many_amino_acids <- c(amino_acids, add_amino_acids)
+many_amino_acids
+```
+
+## Matrix
+
+-   A matrix is a table consisting of objects with the same data type.
+-   To create a matrix, use the `matrix()` function:
+
+```{r}
+amino_acids_matrix <- matrix(c("methionine", "leucine", "alanine", "valine", "glutamine", "threonine"), nrow=3, ncol=2)
+amino_acids_matrix
+```
+
+-   We can add rows using `rbind()`:
+
+```{r}
+amino_acids_matrix <-  rbind(amino_acids_matrix, c("proline", "arginine"))
+amino_acids_matrix
+```
+
+-   Also we can add columns using `cbind()`:
+
+```{r}
+amino_acids_matrix <-  cbind(amino_acids_matrix, c("histidine", "phenylalanine", "tryptophan", "selenocysteine"))
+amino_acids_matrix
+```
+
+-   Accessing items in a matrix can be done like so:
+
+```{r}
+amino_acids_matrix[1, 2] # Accesses the first row, second column
+amino_acids_matrix[4, 3] # Accesses the fourth row, third column
+```
+
+-   We can also check if the items in a matrix satisfies a given condition:
+-   `any()` checks if at least one of the items satisfies the condition
+-   `all()` checks if all of the items satisfy the condition
+
+```{r}
+numbers <- matrix(c(2, 4, 6, 8, 10, 12, 14, 16, 18), nrow=3, ncol=3)
+any(numbers < 6)
+any(numbers < 1)
+all(numbers < 20)
+all(numbers < 5)
+```
+
+-   It is possible to name the rows and columns (also called the *dimensions*) of a matrix using `colnames()` and `rownames()`, respectively.
+
+-   This can greatly aid in making our matrix more descriptive, especially when we perform some analysis.
+
+```{r}
+colnames(numbers) <- c("Treatment 1", "Treatment 2", "Treatment 3")
+rownames(numbers) <- c("Patient 1", "Patient 2", "Patient 3")
+numbers
+```
+
+-   Finally, we demonstrate some matrix operations:
+
+```{r}
+numbers1 <- matrix(c(2, 4, 6, 8, 10, 12, 14, 16, 18), nrow=3, ncol=3)
+numbers2 <- matrix(c(12, 14, 16, 18, 20, 22, 24, 26, 28), nrow=3, ncol=3)
+
+numbers1 + numbers2
+numbers1 - numbers2
+numbers1 * numbers2
+numbers1 / numbers2
+
+100 * numbers1 # Scalar multiplication
+t(numbers1) # Matrix transpose
+```
+
+## List
+
+-   A list is a collection of objects with possibly different data types.
+-   To create a list, use the `list()` function:
+
+```{r}
+assorted_list <- list("proline", "methionine", 1, 2)
+assorted_list
+```
+
+-   Accessing list items can be a bit tricky though.
+-   Observe how `assorted_list[1]` does not return the item `proline`. It actually returns a list containing `proline`.
+
+```{r}
+assorted_list[1]
+```
+
+-   If we want the item `proline` to be returned, we have to use double brackets:
+
+```{r}
+assorted_list[[1]]
+```
+
+-   If we want a summary of the list elements, we can use the `summary()` function.
+
+```{r}
+summary(assorted_list)
+```
+
+## Dataframe
+
+-   In data analysis, information is often structured in organized tables that have a certain number of rows and columns like an Excel spreadsheet.
+
+-   R data frames are a type of data structure designed to hold such tabular data. A data frame consists of a number of rows and columns, with each column representing some variable or feature of the data and each row representing a record.
+
+-   A data frame is similar to a matrix in that it is a 2-dimensional data structure but unlike a matrix, different columns can hold data of different types. It is composed of many lists.
+
+-   You can create a new data frame by passing vectors of the same length to the `data.frame()` function.
+
+```{r}
+a <- c(1, 2, 3, 4)
+b <- c("R", "Python", "PHP", "JS")
+c <- c(TRUE, FALSE, TRUE, FALSE)
+
+# Create a new data frame
+my_frame <- data.frame(a, b, c)
+
+my_frame
+```
+
+-   You can also change your column and row names.
+
+```{r}
+# Change column names
+colnames(my_frame) <- c("c1", "c2", "c3")
+
+# Add row names
+rownames(my_frame) <- c("r1", "r2", "r3", "r4")
+my_frame
+```
+
+-   For reference, we will be loading a dataset on phage-host interaction to illustrate the use of `dataframes` in reading dataset files.
+
+```{r}
+dataset <- read.delim("data.tsv")
+```
+
+**Summarizing Data Frames**
+
+-   Data frames support many of the summary functions that apply to matrices and lists.
+
+-   The `str()` function gives an overview of the structure of the Data Frame. It is useful to check the structure first, since running a full summary can take a while if you are working with a lot of data.
+
+-   The `summary()` function gives summary statistics for each variable in the data frame.
+
+```{r}
+str(dataset) # get a sense of the range of values in your dataset
+summary(dataset)
+```
+
+-   Data frames support a few other basic summary operations.
+
+```{r}
+dim(dataset)
+nrow(dataset)
+ncol(dataset)
+```
+
+-   If a data frame is large, you won't want to try to print the entire frame to the screen. You can look at a few rows at the beginning or end of a data frame using the `head()` and `tail()` functions respectively:
+
+```{r}
+head(dataset, 5)
+
+tail(dataset, 5)
+```
+
+**Dataframe Indexing**
+
+-   Since data frame are lists under the hood, where each list object is a column, they support the indexing operations that apply to lists.
+
+-   Data frames also support matrix-like indexing by using a single square bracket with a comma separating the index value for the row and column. Matrix indexing allows you get values by row or specific values within the data frame.
+
+***You can also delete columns in a data frame by assigning them a value of NULL.***
+
+```{r}
+head(dataset$model)
+head(dataset[["model"]])
+head(dataset[[1]])
+
+# Get the value at row 2 column 6
+dataset[2, 6]
+
+# Get the second row
+dataset[2, ]
+
+# Get the 6th column
+dataset[, 6]
+
+# Get a column by using its name
+dataset[, "mpg"]
+```
+
+**Filtering of Dataframes**
+
+-   You can also use the `subset()` function to create data frame subsets based on logical statements. `subset()` takes the data frame as the first argument and then a logical statement as the second argument create a subset.
+
+```{r}
+subset(dataset, (dataset$hp > 160))
+```

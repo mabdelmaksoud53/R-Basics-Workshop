@@ -9,6 +9,8 @@ Welcome to the **R Basics Workshop**, designed for beginners from any field who 
 
 This workshop introduces R programming from the ground up, focusing on fundamental concepts and practical examples in data summarization and exploration.
 
+![Graph](images/Graph.png)
+
 ### Topics Covered
 
 - Installing and setting up R and RStudio
