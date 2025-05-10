@@ -1,5 +1,5 @@
 ---
-title: "Groups of Data - Vectors, Matrices, Lists & Dataframes"
+title: "Data Structure - Vectors, Matrices, Lists & Dataframes"
 author: Mostafa S. Abd El-Maksoud
 output: html_notebook
 ---
@@ -117,7 +117,7 @@ assorted_list
 assorted_list[1]
 ```
 
--   If we want the item `proline` to be returned, we have to use double brackets:
+- If we want the item `proline` to be returned, we have to use double brackets:
 
 ```{r}
 assorted_list[[1]]
